@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geovisor</title>
+    
+    <!-- Fuentes de Google: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Evitar parpadeo (Layout Shift) al cargar el ancho del sidebar -->
+    <script>
+        (function() {
+            try {
+                const savedWidth = localStorage.getItem('geovisor_sidebar_width');
+                if (savedWidth) {
+                    const widthNum = parseInt(savedWidth);
+                    if (widthNum >= 280 && widthNum <= 600) {
+                        document.documentElement.style.setProperty('--sidebar-width', savedWidth + 'px');
+                    }
+                }
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- Panel Lateral / Menú Glassmorphism -->
+    <div id="sidebar" class="glass-panel">
+        <header>
+            <h1 id="app-title">Geovisor <span>Mesoamérica</span></h1>
+            <p id="app-subtitle">Datos espaciales y de conservación</p>
+        </header>
+
+
+
+        <div class="layer-control">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--panel-border); padding-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">Capas Disponibles</h3>
+                <button id="btn-re-escanear" class="btn-secondary" style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; border-radius: 6px; cursor: pointer; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--accent-color);" title="Escanear carpeta data/ para cargar nuevas capas">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Escanear
+                </button>
+            </div>
+            <ul id="layer-list">
+                <!-- Los switches de las capas se generarán dinánamicamente -->
+            </ul>
+            <div id="custom-layers-status" style="margin-top: 8px; font-size: 11px; color: var(--accent-color); font-weight: 500; text-align: center;"></div>
+            <a href="https://mapshaper.org/" target="_blank" class="btn-mapshaper" title="Convertir Shapefile/KML a GeoJSON usando Mapshaper">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color); margin-right: 4px;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Convertir capas (Mapshaper)
+            </a>
+        </div>
+
+        <footer>
+            <p id="app-author">Cluster Copernicus AFOLU - Programa Grandes Bosques de Mesoamérica</p>
+        </footer>
+    </div>
+
+    <!-- Tirador para redimensionar el panel lateral -->
+    <div id="sidebar-resizer" class="sidebar-resizer"></div>
+
+    <!-- Contenedor del Mapa -->
+    <div id="map"></div>
+
+    <!-- Selector de Mapa Base Flotante -->
+    <div id="basemap-control" class="glass-panel-basemap">
+        <button id="btn-basemap" title="Cambiar mapa base">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        </button>
+        <div id="basemap-menu" class="basemap-menu">
+            <button class="basemap-opt active" data-value="dark">Oscuro (CartoDB)</button>
+            <button class="basemap-opt" data-value="light">Claro (CartoDB)</button>
+            <button class="basemap-opt" data-value="google_streets">Google Calles</button>
+            <button class="basemap-opt" data-value="google_satellite">Google Satélite</button>
+            <button class="basemap-opt" data-value="google_hybrid">Google Híbrido</button>
+        </div>
+    </div>
+
+
+
+    <!-- Panel de Gráficos Flotante (Glassmorphism) -->
+    <div id="chart-panel" class="glass-panel-chart" style="display: none;">
+        <div class="chart-panel-header">
+            <h3 id="chart-panel-title">Gráficos de Capa: <span id="chart-layer-name">Nombre</span></h3>
+            <button id="btn-close-chart-panel" class="btn-close-chart" title="Cerrar panel de gráficos">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="chart-panel-body">
+            <div class="chart-controls-row">
+                <div class="chart-control-group">
+                    <label for="chart-type-select">Tipo de Gráfico</label>
+                    <select id="chart-type-select" class="chart-select">
+                        <option value="bar">Barras</option>
+                        <option value="line">Líneas</option>
+                        <option value="pie">Circular / Torta</option>
+                        <option value="doughnut">Dona</option>
+                    </select>
+                </div>
+                <div class="chart-control-group">
+                    <label for="chart-cat-select">Variable Categórica</label>
+                    <select id="chart-cat-select" class="chart-select">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <div class="chart-control-group">
+                    <label for="chart-num-select">Variable Numérica</label>
+                    <select id="chart-num-select" class="chart-select">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <div class="chart-control-group">
+                    <label for="chart-agg-select">Agregación</label>
+                    <select id="chart-agg-select" class="chart-select">
+                        <option value="sum">Suma</option>
+                        <option value="avg">Promedio</option>
+                        <option value="count">Recuento</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="chart-canvas-container">
+                <canvas id="layer-chart-canvas"></canvas>
+            </div>
+        </div>
+        <div class="chart-panel-footer">
+            <button id="btn-save-chart" class="btn-save-chart-config">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                Guardar en Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Turf.js para análisis espacial en el navegador -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+
+    <!-- Chart.js para visualización de gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Leaflet.heat para mapas de calor -->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    
+    <!-- Lógica de la aplicación -->
+    <script src="app.js"></script>
+</body>
+</html>

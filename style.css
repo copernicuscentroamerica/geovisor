@@ -1,0 +1,1197 @@
+/* Reset y variables de diseño */
+:root {
+    --bg-dark: #0f172a;
+    --panel-bg: rgba(15, 23, 42, 0.7);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --font-main: 'Inter', sans-serif;
+    --sidebar-width: 320px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden; /* El mapa ocupará todo */
+}
+
+/* Contenedor del Mapa */
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* Modo oscuro para los popups de Leaflet */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(8px);
+}
+
+.leaflet-popup-content {
+    font-family: var(--font-main);
+    font-size: 14px;
+}
+
+.leaflet-popup-content b {
+    color: var(--accent-color);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--text-secondary);
+}
+
+/* Panel Lateral Glassmorphism */
+.glass-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    max-height: 100vh;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid var(--panel-border);
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 16px 16px 0;
+    padding: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+/* Barra para redimensionar el panel lateral */
+.sidebar-resizer {
+    position: absolute;
+    top: 0;
+    left: var(--sidebar-width);
+    width: 6px;
+    height: 100vh;
+    cursor: col-resize;
+    z-index: 1001; /* Justo sobre el panel lateral */
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-resizer::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 20px);
+    left: 2px;
+    width: 2px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 1px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+    background-color: rgba(56, 189, 248, 0.4); /* Color de acento con opacidad */
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.dragging::after {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Cabecera */
+header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Controles de Capa */
+.layer-control h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.layer-control {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+ul#layer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Scrollbar personalizado para la lista de capas */
+ul#layer-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+ul#layer-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+
+ul#layer-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+}
+
+ul#layer-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.layer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px; /* Espacio mínimo garantizado entre el nombre y los controles */
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.layer-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--panel-border);
+}
+
+.layer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0; /* Permite que el texto largo haga wrapping y no empuje el switch */
+}
+
+.color-indicator-wrapper {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.color-indicator {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+/* Estilos de simbología específicos por tipo de geometría */
+.layer-info .color-indicator.geom-polygon {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.layer-info .color-indicator.geom-line {
+    width: 20px;
+    height: 4px;
+    border-radius: 2px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.layer-info .color-indicator.geom-point {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.color-indicator-wrapper input[type="color"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    outline: none;
+}
+
+.layer-name {
+    font-size: 14px;
+    font-weight: 500;
+    overflow-wrap: break-word;
+    word-break: break-word; /* Permite romper palabras extremadamente largas sin espacios como nombres con guiones bajos */
+}
+
+/* Acciones de la capa (eliminar + switch) */
+.layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0; /* Evita que el contenedor de acciones se encoja o desalinee */
+}
+
+/* Estilo para los Checkbox interactivos (Switch) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    flex-shrink: 0; /* Evita que el switch se deforme */
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.1);
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--text-secondary);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+    background-color: #fff;
+}
+
+/* Pie de página */
+footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-border);
+}
+
+footer p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Controles de Filtros */
+.filter-control h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    margin-top: 16px;
+}
+
+.filter-control label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.filter-control select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    background: rgba(15, 23, 42, 0.9);
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    outline: none;
+    font-family: var(--font-main);
+    font-size: 13px;
+    transition: border-color 0.3s;
+}
+
+.filter-control select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.filter-control select:focus {
+    border-color: var(--accent-color);
+}
+
+/* Configuración de País en Panel Lateral */
+.country-config-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+}
+
+#active-country-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#active-country-info .label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#active-country-info .country-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.btn-config {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-config:hover {
+    background: var(--accent-color);
+    color: #0f172a;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.btn-config svg {
+    transition: transform 0.5s ease;
+}
+
+.btn-config:hover svg {
+    transform: rotate(45deg);
+}
+
+/* Modal de Configuración (Glassmorphism Overlay) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.glass-panel-modal {
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 85vh;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-body {
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-overlay.active .glass-panel-modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 12px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn-icon-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-icon-close:hover {
+    color: #f43f5e;
+}
+
+.modal-body p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.form-group-modal label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.form-group-modal select {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, 0.95);
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    outline: none;
+    font-family: var(--font-main);
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group-modal select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid var(--panel-border);
+    padding-top: 16px;
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: #0f172a;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Modificaciones para capas deshabilitadas */
+.layer-item.disabled {
+    opacity: 0.35;
+}
+.layer-item.disabled .switch input {
+    cursor: not-allowed;
+}
+.layer-item.disabled .slider {
+    background-color: rgba(255, 255, 255, 0.02);
+    cursor: not-allowed;
+}
+.layer-item.disabled .slider:before {
+    background-color: #475569;
+}
+.layer-item.disabled .layer-name {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+/* Selector de Mapa Base Flotante (Glassmorphism) */
+.glass-panel-basemap {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+#btn-basemap {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#btn-basemap:hover {
+    background: var(--accent-color);
+    color: #0f172a;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+    transform: scale(1.05);
+}
+
+#btn-basemap svg {
+    transition: transform 0.3s ease;
+}
+
+#btn-basemap:hover svg {
+    transform: rotate(15deg);
+}
+
+.basemap-menu {
+    display: none;
+    flex-direction: column;
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    min-width: 170px;
+    gap: 4px;
+    animation: slideDownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.basemap-menu.active {
+    display: flex;
+}
+
+.basemap-opt {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    text-align: left;
+    font-family: var(--font-main);
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.basemap-opt:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.basemap-opt.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Estilos para el panel de personalización de leyendas y estilos de capa */
+.layer-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.layer-style-panel {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 0 0 8px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: none;
+    margin-top: -4px;
+    margin-bottom: 6px;
+    animation: slideDownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.layer-style-panel.active {
+    display: flex;
+}
+
+/* Acople visual entre el layer-item y su panel de estilos abierto */
+.layer-wrapper.style-active .layer-item {
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.btn-style {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-style:hover:not(:disabled) {
+    color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-style:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-style.active {
+    color: var(--accent-color);
+    background: rgba(56, 189, 248, 0.15);
+}
+
+.style-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.style-row span {
+    font-weight: 500;
+}
+
+.style-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Switches mini para el panel de estilos */
+.style-controls .switch {
+    width: 32px;
+    height: 16px;
+}
+
+.style-controls .switch input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+.style-controls .slider:before {
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+}
+
+.style-controls input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
+/* Botón de Guardar Estilo */
+.style-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 8px;
+}
+
+.btn-save-style {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--accent-color);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: var(--font-main);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-save-style:hover {
+    background: var(--accent-color);
+    color: #0f172a;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.btn-save-style.saved {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #10b981 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Estilos para el slider de transparencia */
+.style-range {
+    -webkit-appearance: none;
+    width: 80px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    cursor: pointer;
+}
+
+.style-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.style-range::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+/* Sección de Clasificación en el Panel de Estilo */
+.classification-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.classification-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.classification-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.classification-row-inputs {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.classification-select {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.85);
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    outline: none;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.classification-select:focus {
+    border-color: var(--accent-color);
+}
+
+/* Leyenda de Capas */
+.layer-legend {
+    margin-top: 6px;
+    margin-left: 28px;
+    margin-right: 12px;
+    padding: 8px 10px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+/* Scrollbar de leyenda */
+.layer-legend::-webkit-scrollbar {
+    width: 4px;
+}
+.layer-legend::-webkit-scrollbar-track {
+    background: transparent;
+}
+.layer-legend::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.legend-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Panel de Gráficos Flotante */
+.glass-panel-chart {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 600px;
+    max-height: 450px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeInChart 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInChart {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chart-panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chart-panel-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.chart-layer-name {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.btn-close-chart {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.btn-close-chart:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.chart-panel-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+.chart-controls-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.chart-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chart-control-group label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chart-select {
+    background: rgba(15, 23, 42, 0.85);
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+    outline: none;
+    font-family: var(--font-main);
+    cursor: pointer;
+    width: 100%;
+}
+
+.chart-select:focus {
+    border-color: var(--accent-color);
+}
+
+.chart-canvas-container {
+    height: 220px;
+    position: relative;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.chart-panel-footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-save-chart-config {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.btn-save-chart-config:hover {
+    background: rgba(56, 189, 248, 0.3);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.btn-save-chart-config.saved {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+
+/* Botón de Gráfico en lista de capas */
+.btn-chart-layer {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-chart-layer:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-color);
+}
+
+.btn-chart-layer.active {
+    color: var(--accent-color);
+    background: rgba(56, 189, 248, 0.1);
+}
+
+/* Botón de Renombrar capa */
+.btn-rename-layer {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-rename-layer:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--accent-color) !important;
+    border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Botón de Mapshaper */
+.btn-mapshaper {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    padding: 8px;
+    font-size: 11px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-mapshaper:hover {
+    background: rgba(56, 189, 248, 0.08) !important;
+    border-color: rgba(56, 189, 248, 0.3) !important;
+    color: var(--accent-color) !important;
+}
+
+
